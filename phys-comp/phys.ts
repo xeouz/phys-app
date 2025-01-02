@@ -1,6 +1,9 @@
-import { Application, Assets, Sprite, Ticker } from 'pixi.js';
+import { Application, Assets, GraphicsContext, Sprite, Ticker } from 'pixi.js';
 import { PhysData } from './data';
 import { Vector2 } from './math';
+import { RenderConstructor, RenderParams } from './render';
+import { PhysObject } from './object';
+import { CircleShape } from './shapes/circle';
 
 export class Phys {
     app: Application;
@@ -14,7 +17,7 @@ export class Phys {
     }
 
     async init() {
-        await this.app.init({ background: '#81a1c1', resizeTo: this.container });
+        await this.app.init({ background: '#81a1c1', resizeTo: this.container, antialias: true, autoDensity: true });
 
         this.container.appendChild(this.app.canvas);
 
@@ -22,8 +25,10 @@ export class Phys {
 
         this.app.stage.eventMode = 'static';
         this.app.stage.hitArea = this.app.screen;
-        
+
+        this.data.stage = this.app.stage;
         this.data.dimensions = new Vector2(this.app.screen.width, this.app.screen.height);
+
         this.app.stage.addEventListener('pointermove', (e) => {
             let x = e.global.x;
             let y = e.global.y;

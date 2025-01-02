@@ -1,12 +1,20 @@
-import { Vector2 } from './math';
+import { Container, ContainerChild, Graphics, GraphicsContext } from 'pixi.js';
+import { transformPosition, untransformPosition, Vector2 } from './math';
+import { RenderConstructor } from './render';
+import { PhysObject } from './object';
 
 export class PhysData {
+    stage: Container<ContainerChild> = new Container();
+
     dimensions = new Vector2(0, 0);
     mouse_position = new Vector2(0, 0);
     mouse_down = {left: false, right: false};
     dt = 0;
 
     should_transform_position = true;
+    graphics_objects: Map<string, Graphics> = new Map();
+    
+    phys_objects: Map<string, PhysObject> = new Map();
     
     constructor() {
         
@@ -20,18 +28,35 @@ export class PhysData {
 
         this.mouse_position = transformPosition(position, this.dimensions);
     }
-}
 
-function transformPosition(position: Vector2, dimensions: Vector2) {
-    let tx = position.x - (dimensions.x / 2);
-    let ty = -(position.y - (dimensions.y / 2));
+    addGraphics(id: string, graphics: Graphics) {
+        this.graphics_objects.set(id, graphics);
+        this.stage.addChild(graphics);
+    }
 
-    return new Vector2(tx, ty);
-}
+    removeGraphics(id: string) {
+        if(!this.graphics_objects.has(id)) return;
 
-function untransformPosition(position: Vector2, dimensions: Vector2) {
-    let tx = position.x + (dimensions.x / 2);
-    let ty = -(position.y - (dimensions.y / 2));
+        this.stage.removeChildAt(this.stage.getChildIndex(this.graphics_objects.get(id)!));
+        this.graphics_objects.get(id)!.destroy();
+        this.graphics_objects.delete(id);
+    }
 
-    return new Vector2(tx, ty);
+    attachPhysObject(object: PhysObject) {
+        this.phys_objects.set(object.id, object);
+        this.graphics_objects.set(object.id, object.graphics);
+        this.stage.addChild(object.graphics);
+    }
+
+    detachPhysObject(id: string) {
+        this.stage.removeChildAt(this.stage.getChildIndex(this.graphics_objects.get(id)!));
+        this.graphics_objects.delete(id);
+        this.phys_objects.delete(id);
+    }
+
+    updatePhysObjects() {
+        this.phys_objects.forEach((object) => {
+
+        });
+    }
 }
